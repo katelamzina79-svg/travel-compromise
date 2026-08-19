@@ -1,9 +1,15 @@
+from pathlib import Path
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from app.routers import session, places
+
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+FRONTEND_DIR = BASE_DIR / "frontend-static"
 
 app = FastAPI(title="Travel Compromise")
 
@@ -25,4 +31,11 @@ def health_check():
 
 @app.get("/")
 def index():
-    return FileResponse("frontend-static/index.html")
+    return FileResponse(FRONTEND_DIR / "index.html")
+
+
+app.mount(
+    "/static",
+    StaticFiles(directory=FRONTEND_DIR),
+    name="static",
+)
