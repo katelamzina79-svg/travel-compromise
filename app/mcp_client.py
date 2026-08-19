@@ -18,16 +18,38 @@ async def get_mcp_session():
             await session.initialize()
             yield session
 
-
 async def call_tool(tool_name: str, arguments: dict) -> dict:
-    """Вызывает инструмент MCP и возвращает распарсенный JSON первого текстового блока ответа."""
-    async with get_mcp_session() as session:
-        result = await session.call_tool(tool_name, arguments=arguments)
-        for content in result.content:
-            if hasattr(content, "text"):
-                return json.loads(content.text)
-    return {}
+    """Вызывает инструмент MCP с подробным логированием ошибки."""
+    try:
+        print(f"[MCP] URL configured: {bool(MCP_URL)}")
+        print(f"[MCP] Calling tool: {tool_name}")
+        print(f"[MCP] Arguments: {arguments}")
 
+        async with get_mcp_session() as session:
+            print("[MCP] Session initialized")
+
+            result = await session.call_tool(
+                tool_name,
+                arguments=arguments,
+            )
+
+            print(f"[MCP] Tool result received: {result}")
+
+            for content in result.content:
+                if hasattr(content, "text"):
+                    print(f"[MCP] Raw content: {content.text}")
+                    return json.loads(content.text)
+
+        return {}
+
+    except Exception as e:
+        import traceback
+
+        print(f"[MCP ERROR] {type(e).__name__}: {e}")
+        print("[MCP ERROR] Full traceback:")
+        traceback.print_exc()
+
+        raise
 
 async def search_multitransport(origin: str, destination: str, departure_date: str) -> dict:
     return await call_tool(
