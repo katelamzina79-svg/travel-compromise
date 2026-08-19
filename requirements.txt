@@ -83,3 +83,4 @@ typing_extensions==4.16.0
 tzdata==2026.3
 uvicorn==0.52.4
 xgboost==3.4.0
+fastapi
